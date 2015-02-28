@@ -35,7 +35,7 @@ def main():
         args=parser.parse_args()
         
         from jlddbus.tools_sys import dnorm, info_dump
-        from jlddbus.script_discover import run
+        from jlddbus.script_signal import run
         
         args=dnorm(vars(args))
         info_dump(args, 20)       
