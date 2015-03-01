@@ -30,7 +30,8 @@ def main():
         import jlddbus.do_checks #@UnusedImport
         
         parser=argparse.ArgumentParser(description=DESC, fromfile_prefix_chars='@')
-        #parser.add_argument('-i',  dest='interface',  type=str, help="Input interface")        
+        parser.add_argument('-p',  dest='path',  type=str, help="Signal Path", default="/signal")
+        #parser.add_argument('-p',  dest='path',  type=str, help="Signal Path", default="/signal")        
         
         args=parser.parse_args()
         

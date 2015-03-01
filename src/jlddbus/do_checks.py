@@ -8,3 +8,7 @@ try:
 except:
     raise Exception("* package 'argparse' is necessary - get it from Pypi\n")
 
+try:
+    import dbus #@UnusedImport
+except:
+    raise Exception("* package 'dbus' is necessary - get it from Pypi\n")
