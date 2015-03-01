@@ -6,7 +6,9 @@ import os
 import logging
 import json
 
-
+##
+## Help raise an exception when a SIGPIPE issue occurs
+##
 from signal import signal, SIGPIPE, SIG_DFL 
 signal(SIGPIPE,SIG_DFL) 
 
