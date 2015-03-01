@@ -4,6 +4,7 @@
 """
 import os
 import logging
+import json
 
 
 from signal import signal, SIGPIPE, SIG_DFL 
@@ -32,10 +33,27 @@ class SystemicalObject(dbus.service.Object):
         dbus.service.Object.__init__(self, conn, object_path)
 
     @dbus.service.signal('com.systemical.signals')
-    def emit_signal(self, message):
+    def signal(self, message):
         """
-        signal sender=:1.208 -> dest=(null destination) serial=20 path=/test; interface=com.systemical.signals; member=emit_signal
-           string "{"usn": " uuid:02DA8AC3-07AE-9140-ED8D-EEBA2A31B277", "nt": " uuid:02DA8AC3-07AE-9140-ED8D-EEBA2A31B277", "location": " http://192.168.1.1/HNAP1/", "server": " POSIX, UPnP/1.0 linux/5.10.56.51"}"
+            signal sender=:1.223 -> dest=(null destination) serial=24 path=/ssdp; interface=com.systemical.signals; member=signal
+               array [
+                  dict entry(
+                     string "usn"
+                     string " uuid:ae67e622-7a66-465e-bab0-28107b1ad1ea::urn:cellvision:service:Null:1"
+                  )
+                  dict entry(
+                     string "nt"
+                     string " urn:cellvision:service:Null:1"
+                  )
+                  dict entry(
+                     string "location"
+                     string " http://192.168.1.140:8172/rootdesc.xml"
+                  )
+                  dict entry(
+                     string "server"
+                     string " Cellvision UPnP/1.0"
+                  )
+               ]
         """
 
      
@@ -56,7 +74,15 @@ class Main(basic.LineReceiver):
     def lineReceived(self, line):
         if self.debug:
             logging.info("Line:\n %s" % repr(line))
-        self.dobj.emit_signal(line)
+            
+        try:
+            jobj = json.loads(line)
+            
+        except:
+            if self.debug:
+                logging.warning("Can't JSON decode")
+        else:
+            self.dobj.signal(jobj)
 
 
     
