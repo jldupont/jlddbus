@@ -34,7 +34,7 @@ setup(name=         'jlddbus',
                      ],
       zip_safe=False
       ,long_description=DESC
-      ,install_requires=[ "argparse", "dbus"
+      ,install_requires=[ "argparse",
                          ]
       )
 
