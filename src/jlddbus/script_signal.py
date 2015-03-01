@@ -5,14 +5,23 @@
 import os
 import logging
 
+
+from signal import signal, SIGPIPE, SIG_DFL 
+signal(SIGPIPE,SIG_DFL) 
+
+
+
 import dbus.service
 
 from twisted.internet import glib2reactor
 glib2reactor.install()
 
+
 from twisted.internet import reactor
 from twisted.internet import stdio
 from twisted.protocols import basic
+from twisted.internet.task import LoopingCall
+
 
 from dbus.mainloop.glib import DBusGMainLoop
 DBusGMainLoop(set_as_default=True)
@@ -33,20 +42,36 @@ class SystemicalObject(dbus.service.Object):
 
 class Main(basic.LineReceiver):
     
-    def __init__(self, bus, dobj):
+    def __init__(self, bus, dobj, debug=False):
         self.bus = bus
         self.dobj = dobj
+        self.debug = debug
     
     delimiter = os.linesep
     
     def connectionMade(self):
-        logging.info("Connection established")
+        if self.debug:
+            logging.info("Connection established")
         
     def lineReceived(self, line):
-        logging.info("Line:\n %s" % repr(line))
+        if self.debug:
+            logging.info("Line:\n %s" % repr(line))
         self.dobj.emit_signal(line)
 
-def run(path=None):
+
+    
+def watch_dog_task(start_ppid, debug=False):
+    """
+    If our parent exited there is no use pursuing
+    """
+    current_ppid = os.getppid()
+    if current_ppid!=start_ppid:
+        logging.warning("Parent exited...")
+        reactor.stop()
+
+
+
+def run(path=None, debug=False):
     """
     Entry Point
     """
@@ -56,33 +81,21 @@ def run(path=None):
     dobj = SystemicalObject(bus, path)
     
     ppid=os.getppid()
-    logging.info("Process pid: %s" % os.getpid())
-    logging.info("Parent pid : %s" % ppid)
-    logging.info("Starting loop...")
     
-    stdio.StandardIO(Main(bus, dobj))
+    if debug:
+        logging.info("Process pid: %s" % os.getpid())
+        logging.info("Parent pid : %s" % ppid)
+        logging.info("Starting loop...")
+    
+    ##
+    ## Every 5 seconds check if we need to exit
+    ##
+    lc = LoopingCall(lambda:watch_dog_task(ppid, debug=debug))
+    lc.start(5)
+    
+    stdio.StandardIO(Main(bus, dobj, debug=debug))
     reactor.run()
     
-    
-    '''
-    while True:
-        
-        ### protection against broken pipe
-        if os.getppid()!=ppid:
-            logging.warning("Parent process terminated... exiting")
-            break
-        
-        iline=sys.stdin.readline().strip()
-        
-        try:
-            jdict = json.loads(iline)
-        except:
-            logging.warning("Can't JSON decode: %s" % repr(iline))
-            continue
-        
-        logging.info("Received: %s" % repr(jdict))
-        #dobj.emit_signal(json.dumps(jdict))
-    '''
      
 #
 #

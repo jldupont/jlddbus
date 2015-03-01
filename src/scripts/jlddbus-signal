@@ -31,7 +31,7 @@ def main():
         
         parser=argparse.ArgumentParser(description=DESC, fromfile_prefix_chars='@')
         parser.add_argument('-p',  dest='path',  type=str, help="Signal Path", default="/signal")
-        #parser.add_argument('-p',  dest='path',  type=str, help="Signal Path", default="/signal")        
+        parser.add_argument('-d',  dest='debug', action='store_true', help="Debug Mode", default=False)        
         
         args=parser.parse_args()
         
@@ -39,7 +39,10 @@ def main():
         from jlddbus.script_signal import run
         
         args=dnorm(vars(args))
-        info_dump(args, 20)       
+        
+        if args.get('debug', False):
+            info_dump(args, 20)
+                   
         run(**args)
 
 
