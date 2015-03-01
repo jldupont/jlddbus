@@ -11,4 +11,10 @@ except:
 try:
     import dbus #@UnusedImport
 except:
-    raise Exception("* package 'dbus' is necessary - get it from Pypi\n")
+    raise Exception("* package 'python-dbus' is necessary - apt-get install it\n")
+
+
+try:
+    import gobject #@UnusedImport
+except:
+    raise Exception("* package 'python-gobject' is necessary - apt-get install it\n")
